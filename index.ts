@@ -23,21 +23,22 @@ class Emittable<T extends EventMap> {
     eventName: K,
     fn: EventReceiver<T[K]>
   ) {
-    const eventListeners = this.listeners[eventName];
-    if (eventListeners) {
-      this.listeners[eventName] = eventListeners.filter(listener => listener !== fn);
+    const listeners = this.listeners[eventName];
+    if (listeners) {
+      this.listeners[eventName] = listeners.filter(listener => listener !== fn);
     }
   }
 
   public emit<K extends EventNames<T>>(eventName: K, params: T[K]) {
-    const eventListeners = this.listeners[eventName];
-    if (eventListeners) {
-      eventListeners.forEach(listener => {
+    const listeners = this.listeners[eventName];
+    if (listeners) {
+      listeners.forEach(listener => {
         listener(params);
       });
     }
   }
 }
+
 
 // An example:
 type PlayerEventMap = {
@@ -49,6 +50,7 @@ type PlayerEventMap = {
   stop: number;
 };
 
+// 1. Class 
 class Player extends Emittable<PlayerEventMap> {
   private isError: boolean = false;
 
@@ -89,3 +91,11 @@ player.addEventListener('start', (params) => {
 player.addEventListener('stop', (params) => {
   console.debug('onStop', params);
 });
+
+// 2. Factory 
+function createEmitter<T extends EventMap>() {
+  return new Emittable<T>();
+}
+
+const playerEventEmitter = createEmitter<PlayerEventMap>()
+playerEventEmitter.addEventListener('stop', () => {})
